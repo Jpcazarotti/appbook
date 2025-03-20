@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:appbook/detalhes_page.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,7 +11,47 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List books = [];
   TextEditingController buscarLivro = TextEditingController();
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    listarLivros();
+  }
+
+  Future<void> listarLivros() async {
+    try {
+      final response = await http.get(
+        Uri.parse("https://openlibrary.org/search.json?q=portugues&limit=20"),
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        setState(() {
+          books = data["docs"];
+          isLoading = false;
+        });
+      } else {
+        mostrarErro("Falha ao carregar os dados.");
+      }
+    } catch (e) {
+      mostrarErro("Erro: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void mostrarErro(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,22 +79,26 @@ class _HomePageState extends State<HomePage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: 10,
+              itemCount: books.length,
               itemBuilder: (context, index) {
+                var book = books[index];
                 return Card(
                   child: ListTile(
                     leading: Image.network(
-                        "https://static.wixstatic.com/media/31a549_7dffb191bffa440686e5a148b8e042d9~mv2.jpg/v1/fill/w_480,h_768,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/31a549_7dffb191bffa440686e5a148b8e042d9~mv2.jpg"),
-                    title: const Text(
-                      "Relatos Por Trás do Véu",
-                      style: TextStyle(
+                      "https://covers.openlibrary.org/b/id/${book['cover_i']}-M.jpg",
+                      fit: BoxFit.cover,
+                    ),
+                    title: Text(
+                      book['title'],
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    subtitle: const Text(
-                      "Um Aterrorizante Thriller Investigativo",
-                      style: TextStyle(fontWeight: FontWeight.w400),
+                    subtitle: Text(
+                      book["author_name"].join(", ") ??
+                          "Este livro não tem Autor",
+                      style: const TextStyle(fontWeight: FontWeight.w400),
                     ),
                     onTap: () {
                       Navigator.push(
