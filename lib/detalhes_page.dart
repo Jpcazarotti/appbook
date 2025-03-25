@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class DetalhesPage extends StatelessWidget {
-  const DetalhesPage({super.key});
+  final Map book;
+  const DetalhesPage({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
@@ -15,25 +16,38 @@ class DetalhesPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.network(
-              "https://static.wixstatic.com/media/31a549_7dffb191bffa440686e5a148b8e042d9~mv2.jpg/v1/fill/w_480,h_768,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/31a549_7dffb191bffa440686e5a148b8e042d9~mv2.jpg",
+              "https://covers.openlibrary.org/b/id/${book['cover_i']}-M.jpg",
               height: 280,
             ),
             const SizedBox(
               height: 20,
             ),
-            const Text(
-              "Relatos Por Trás do Véu",
-              style: TextStyle(
+            Text(
+              book['title'],
+              style: const TextStyle(
                 fontSize: 28,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(
               height: 5,
             ),
-            const Text(
-              "Um Aterrorizante Thriller Investigativo",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+            Text(
+              book['author_name']?.join(", ") ?? "Este livro não tem Autor",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              "Ano de Publicação: ${book['first_publish_year']}",
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ],
         ),

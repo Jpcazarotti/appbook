@@ -14,11 +14,15 @@ class _HomePageState extends State<HomePage> {
   List books = [];
   TextEditingController buscarLivro = TextEditingController();
   bool isLoading = true;
+  List listaBooks = [];
 
   @override
   void initState() {
     super.initState();
     listarLivros();
+    buscarLivro.addListener(() {
+      filtrarLivros();
+    });
   }
 
   Future<void> listarLivros() async {
@@ -30,6 +34,7 @@ class _HomePageState extends State<HomePage> {
         final Map<String, dynamic> data = json.decode(response.body);
         setState(() {
           books = data["docs"];
+          listaBooks = books;
           isLoading = false;
         });
       } else {
@@ -51,6 +56,15 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.red,
       ),
     );
+  }
+
+  void filtrarLivros() {
+    String pesquisa = buscarLivro.text.toLowerCase();
+    setState(() {
+      listaBooks = books.where((book) {
+        return book['title'].toLowerCase().contains(pesquisa);
+      }).toList();
+    });
   }
 
   @override
@@ -79,9 +93,9 @@ class _HomePageState extends State<HomePage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: books.length,
+              itemCount: listaBooks.length,
               itemBuilder: (context, index) {
-                var book = books[index];
+                var book = listaBooks[index];
                 return Card(
                   child: ListTile(
                     leading: Image.network(
@@ -96,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     subtitle: Text(
-                      book["author_name"].join(", ") ??
+                      book['author_name']?.join(", ") ??
                           "Este livro não tem Autor",
                       style: const TextStyle(fontWeight: FontWeight.w400),
                     ),
@@ -104,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const DetalhesPage(),
+                          builder: (context) => DetalhesPage(book: book),
                         ),
                       );
                     },
