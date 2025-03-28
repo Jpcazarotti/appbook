@@ -112,7 +112,9 @@ class _HomePageState extends State<HomePage> {
                     subtitle: Text(
                       book['author_name']?.join(", ") ??
                           "Este livro não tem Autor",
-                      style: const TextStyle(fontWeight: FontWeight.w400),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                     onTap: () {
                       Navigator.push(
